@@ -11,8 +11,8 @@
         hint="Name and surname"
         :rules="[
           (val) => (val && val.length > 0) || 'Поле является обязательным!',
-          //(val) =>
-          // (val && /^[\w.%+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/.test(val)) || 'Должен быть email!',
+          (val) =>
+          (val && /^[\w.%+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/.test(val)) || 'Должен быть email!',
         ]"
       />
 
@@ -38,7 +38,22 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import {api} from '../api/api'
 import type { ILoginForm } from 'components/models';
+import { useUserStore } from "stores/userStore";
+import { useQuasar } from 'quasar';
+import { useRouter } from 'vue-router';
+const router = useRouter();
+
+const $q = useQuasar();
+const userStore = useUserStore();
+
+interface LoginResponse {
+  token: string;
+  userId: number;
+  username: string;
+  email: string;
+}
 
 const form = ref<ILoginForm>({
   email: '',
@@ -46,18 +61,39 @@ const form = ref<ILoginForm>({
 });
 async function onSubmit() {
   try {
-    const response = await fetch('http://localhost:3000/api/v1/auth/login', {
-      method: 'post', // можно не указывать (по умолчанию GET)
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(form.value),
+    const response: LoginResponse = await api.post('/auth/login', {
+      email: form.value.email,
+      password: form.value.password,
     });
 
-    const data = await response.json();
-    console.log(data);
-  } catch (error) {
-    console.log(error);
+    // Сохраняем токен и данные пользователя
+    api.setAuthToken(response.token);
+    userStore.user = {
+      userId: response.userId,
+      username: response.username,
+      email: form.value.email,
+      token: response.token,
+    };
+
+    $q.notify({
+      type: 'positive',
+      message: 'Login successful!',
+    });
+
+    await router.push('/');
+
+  } catch (error: unknown) {
+    console.error('Login error:', error);
+    let errorMessage = 'Login failed. Please try again.';
+
+    if (error instanceof Error) {
+      errorMessage = error.message || errorMessage;
+    }
+
+    $q.notify({
+      type: 'negative',
+      message: errorMessage,
+    });
   }
 }
 

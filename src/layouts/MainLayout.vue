@@ -4,19 +4,22 @@
       <q-toolbar>
         <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
 
-        <q-toolbar-title> Библиотека моделей </q-toolbar-title>
+        <q-toolbar-title>Библиотека моделей</q-toolbar-title>
 
-        <div>
-          <q-btn to="/login" color="primary" icon="login" label="Войти"> </q-btn>
-          <q-btn to="/register" color="primary" icon="perm_identity" label="Регистрация"> </q-btn>
+        <div v-if="!isAuthenticated">
+          <q-btn to="/login" color="primary" icon="login" label="Войти"></q-btn>
+          <q-btn to="/register" color="primary" icon="perm_identity" label="Регистрация"></q-btn>
+        </div>
+        <div v-else>
+          <q-btn color="primary" icon="account_circle" :label="userEmail"></q-btn>
+          <q-btn color="negative" icon="logout" label="Выйти" @click="logout"></q-btn>
         </div>
       </q-toolbar>
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
-        <q-item-label header> Меню </q-item-label>
-
+        <q-item-label header>Меню</q-item-label>
         <EssentialLink v-for="link in linksList" :key="link.title" v-bind="link" />
       </q-list>
     </q-drawer>
@@ -36,8 +39,23 @@
 </style>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import EssentialLink, { type EssentialLinkProps } from 'components/EssentialLink.vue';
+import { useRouter } from 'vue-router';
+import { useQuasar } from 'quasar';
+import { storeToRefs } from 'pinia';
+import { useUserStore } from 'stores/userStore';
+import { api } from 'src/api/api';
+
+const $q = useQuasar();
+const router = useRouter();
+const userStore = useUserStore();
+
+const { user } = storeToRefs(userStore);
+const leftDrawerOpen = ref(false);
+
+const isAuthenticated = computed(() => !!user.value?.token);
+const userEmail = computed(() => user.value?.email || '');
 
 const linksList: EssentialLinkProps[] = [
   {
@@ -54,9 +72,45 @@ const linksList: EssentialLinkProps[] = [
   },
 ];
 
-const leftDrawerOpen = ref(false);
-
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 }
+
+async function checkAuth() {
+  try {
+    // Проверяем токен через API или хранилище
+    if (!user.value?.token) {
+      throw new Error('Не авторизован');
+    }
+
+    // Можно добавить проверку токена через API
+    // await api.get('/auth/verify');
+
+  } catch (err) {
+    console.error('Ошибка проверки авторизации:', err); // Используем переменную ошибки
+    $q.notify({
+      type: 'negative',
+      message: err instanceof Error ? err.message : 'Требуется авторизация',
+    });
+    await router.push('/login');
+  }
+}
+
+async function logout() {
+  try {
+    userStore.clearUser();
+    api.removeAuthToken();
+    await router.push('/login');
+    $q.notify({
+      type: 'positive',
+      message: 'Вы успешно вышли',
+    });
+  } catch (error) {
+    console.error('Ошибка при выходе:', error);
+  }
+}
+
+onMounted(async () => {
+  await checkAuth();
+});
 </script>
