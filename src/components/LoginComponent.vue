@@ -43,8 +43,8 @@ import type { ILoginForm } from 'components/models';
 import { useUserStore } from "stores/userStore";
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
-const router = useRouter();
 
+const router = useRouter();
 const $q = useQuasar();
 const userStore = useUserStore();
 
@@ -65,26 +65,26 @@ async function onSubmit() {
       email: form.value.email,
       password: form.value.password,
     });
+    console.log('Login response:', response);
 
-    // Сохраняем токен и данные пользователя
     api.setAuthToken(response.token);
-    userStore.user = {
+
+    userStore.setUser({
       userId: response.userId,
       username: response.username,
-      email: form.value.email,
+      email: response.email,
       token: response.token,
-    };
+    });
 
     $q.notify({
       type: 'positive',
-      message: 'Login successful!',
+      message: 'Авторизация успешна!',
     });
 
     await router.push('/');
-
   } catch (error: unknown) {
-    console.error('Login error:', error);
-    let errorMessage = 'Login failed. Please try again.';
+    console.error('Ошибка авторизации:', error);
+    let errorMessage = 'Ошибка авторизации. Попробуйте снова.';
 
     if (error instanceof Error) {
       errorMessage = error.message || errorMessage;

@@ -33,9 +33,6 @@
 </template>
 
 <style scoped>
-.black {
-  background: #121212;
-}
 </style>
 
 <script setup lang="ts">
@@ -46,6 +43,7 @@ import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useUserStore } from 'stores/userStore';
 import { api } from 'src/api/api';
+import { Cookies } from 'quasar';
 
 const $q = useQuasar();
 const router = useRouter();
@@ -56,6 +54,38 @@ const leftDrawerOpen = ref(false);
 
 const isAuthenticated = computed(() => !!user.value?.token);
 const userEmail = computed(() => user.value?.email || '');
+
+export interface IApiUser  {
+  id: number;
+  username: string;
+  email: string;
+  token: string;
+}
+
+onMounted(async () => {
+  if (!user.value?.token && Cookies.get('login_token')) {
+    try {
+      // Указываем тип ответа от API
+      const userData = await api.get<IApiUser>('/auth/me');
+      console.log('UserData from API:', userData)
+      userStore.setUser({
+        userId: userData.id,
+        username: userData.username,
+        email: userData.email,
+        token: Cookies.get('login_token') || ''
+      });
+    } catch (error) {
+      userStore.clearUser();
+      api.removeAuthToken();
+      await router.push('/login');
+      console.log(error)
+      $q.notify({
+        type: 'negative',
+        message: 'Сессия истекла. Пожалуйста, войдите снова.'
+      });
+    }
+  }
+});
 
 const linksList: EssentialLinkProps[] = [
   {
@@ -76,25 +106,7 @@ function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 }
 
-async function checkAuth() {
-  try {
-    // Проверяем токен через API или хранилище
-    if (!user.value?.token) {
-      throw new Error('Не авторизован');
-    }
 
-    // Можно добавить проверку токена через API
-    // await api.get('/auth/verify');
-
-  } catch (err) {
-    console.error('Ошибка проверки авторизации:', err); // Используем переменную ошибки
-    $q.notify({
-      type: 'negative',
-      message: err instanceof Error ? err.message : 'Требуется авторизация',
-    });
-    await router.push('/login');
-  }
-}
 
 async function logout() {
   try {
@@ -110,7 +122,4 @@ async function logout() {
   }
 }
 
-onMounted(async () => {
-  await checkAuth();
-});
 </script>

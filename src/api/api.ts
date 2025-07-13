@@ -12,7 +12,13 @@ class ApiClient {
     this.defaultHeaders = {
       'Content-Type': 'application/json',
     }
+    const token = Cookies.get('login_token');
+    if (token) {
+      this.defaultHeaders['Authorization'] = `Bearer ${token}`;
+    }
   }
+
+
 
   private async request<T>(
     endpoint: string,
@@ -94,13 +100,17 @@ class ApiClient {
   }
 
   public setAuthToken(token: string): void {
-    this.defaultHeaders['Authorization'] = `Bearer ${token}`
-    Cookies.set('login_token', token)
+    this.defaultHeaders['Authorization'] = `Bearer ${token}`;
+    Cookies.set('login_token', token, {
+      expires: 7,
+      secure: true,
+      sameSite: 'Strict'
+    });
   }
 
   public removeAuthToken(): void {
-    delete this.defaultHeaders['Authorization']
-    Cookies.set('login_token', '')
+    delete this.defaultHeaders['Authorization'];
+    Cookies.remove('login_token');
   }
 }
 
