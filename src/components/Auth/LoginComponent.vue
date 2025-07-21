@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import {api} from '../api/api'
+import {api} from 'src/api/api'
 import type { ILoginForm } from 'components/models';
 import { useUserStore } from "stores/userStore";
 import { useQuasar } from 'quasar';

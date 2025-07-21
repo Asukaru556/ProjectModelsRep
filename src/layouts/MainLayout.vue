@@ -63,29 +63,37 @@ export interface IApiUser  {
 }
 
 onMounted(async () => {
-  if (!user.value?.token && Cookies.get('login_token')) {
-    try {
-      // Указываем тип ответа от API
-      const userData = await api.get<IApiUser>('/auth/me');
-      console.log('UserData from API:', userData)
-      userStore.setUser({
-        userId: userData.id,
-        username: userData.username,
-        email: userData.email,
-        token: Cookies.get('login_token') || ''
-      });
-    } catch (error) {
-      userStore.clearUser();
-      api.removeAuthToken();
-      await router.push('/login');
-      console.log(error)
-      $q.notify({
-        type: 'negative',
-        message: 'Сессия истекла. Пожалуйста, войдите снова.'
-      });
-    }
+  const token = Cookies.get('login_token');
+  if (!token) {
+    await redirectToLogin();
+    return;
+  }
+
+  try {
+    const userData = await api.get<IApiUser>('/auth/user'); // Эндпоинт для получения данных о текущем пользователе
+    console.log('UserData from API:', userData);
+
+    userStore.setUser({
+      userId: userData.id,
+      username: userData.username,
+      email: userData.email,
+      token: token
+    });
+  } catch (error) {
+    console.error('Ошибка при получении данных пользователя:', error);
+    await redirectToLogin();
   }
 });
+
+const redirectToLogin = async () => {
+  userStore.clearUser();
+  api.removeAuthToken();
+  await router.push('/login');
+  $q.notify({
+    type: 'negative',
+    message: 'Требуется авторизация'
+  });
+};
 
 const linksList: EssentialLinkProps[] = [
   {

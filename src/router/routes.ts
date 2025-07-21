@@ -10,16 +10,16 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/categories',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/CategoriesPage.vue') }],
+    children: [{ path: '', component: () => import('pages/Category/CategoriesPage.vue') }],
   },
 
   {
     path: '/categories',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/CategoriesPage.vue') },
-      { path: 'add', component: () => import('pages/NewCategoryPage.vue') },
-      { path: ':id', component: () => import('pages/CategoryPage.vue') },
+      { path: '', component: () => import('pages/Category/CategoriesPage.vue') },
+      { path: 'add', component: () => import('pages/Category/NewCategoryPage.vue') },
+      { path: ':id', component: () => import('pages/Category/CategoryPage.vue') },
     ],
   },
 
@@ -27,22 +27,22 @@ const routes: RouteRecordRaw[] = [
     path: '/models',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/ModelsPage.vue') },
-      { path: 'add', component: () => import('pages/NewModelPage.vue') },
-      { path: ':id', component: () => import('pages/ModelPage.vue') },
+      { path: '', component: () => import('pages/Model/ModelsPage.vue') },
+      { path: 'add', component: () => import('pages/Model/NewModelPage.vue') },
+      { path: ':id', component: () => import('pages/Model/ModelPage.vue') },
     ],
   },
 
   {
     path: '/login',
     component: () => import('layouts/AuthLayout.vue'),
-    children: [{ path: '', component: () => import('pages/LoginPage.vue') }],
+    children: [{ path: '', component: () => import('pages/Auth/LoginPage.vue') }],
   },
 
   {
     path: '/register',
     component: () => import('layouts/AuthLayout.vue'),
-    children: [{ path: '', component: () => import('pages/RegisterPage.vue') }],
+    children: [{ path: '', component: () => import('pages/Auth/RegisterPage.vue') }],
   },
 
   // Always leave this as last one,

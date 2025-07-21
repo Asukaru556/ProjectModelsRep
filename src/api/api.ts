@@ -33,16 +33,19 @@ class ApiClient {
       this.defaultHeaders['Authorization'] = `Bearer ${tokenCookie}`
     }
 
-    const headers = { ...this.defaultHeaders, ...customHeaders }
+    const baseHeaders = { ...this.defaultHeaders, ...customHeaders };
 
     const config: RequestInit = {
       method,
-      headers,
+      headers: baseHeaders,
       credentials: 'include',
-    }
+    };
 
-    if (data) {
-      config.body = JSON.stringify(data)
+    if (data instanceof FormData) {
+      delete baseHeaders['Content-Type'];
+      config.body = data;
+    } else if (data) {
+      config.body = JSON.stringify(data);
     }
 
     try {
@@ -63,8 +66,16 @@ class ApiClient {
   }
 
   private async parseResponse<T>(response: Response): Promise<T> {
-    const text = await response.text()
-    return text ? JSON.parse(text) : null
+    const text = await response.text();
+    if (!text) return null as unknown as T;
+
+    try {
+      return JSON.parse(text);
+    } catch (err) {
+      console.log(err)
+      // Если не JSON, возвращаем текст как есть
+      return text as unknown as T;
+    }
   }
 
   public get<T>(endpoint: string, headers?: Headers): Promise<T> {

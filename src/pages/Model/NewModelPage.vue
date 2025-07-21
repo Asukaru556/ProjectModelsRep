@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import NewModelComponent from 'components/NewModelComponent.vue';
+import NewModelComponent from 'components/Model/NewModelComponent.vue';
 </script>
 
 <style scoped></style>

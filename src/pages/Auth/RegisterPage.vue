@@ -5,5 +5,5 @@
 </template>
 
 <script setup lang="ts">
-import RegisterComponent from 'components/RegisterComponent.vue';
+import RegisterComponent from 'components/Auth/RegisterComponent.vue';
 </script>

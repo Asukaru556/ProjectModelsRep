@@ -30,26 +30,51 @@ import { onMounted, ref } from 'vue';
 import type { ICategory } from 'components/models';
 import { useCategoriesStore } from 'stores/categoryStore';
 import { storeToRefs } from 'pinia';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter  } from 'vue-router';
 
 const form = ref<ICategory | undefined>(undefined);
 
-const { categories } = storeToRefs(useCategoriesStore());
+const store = useCategoriesStore();
+const { categories } = storeToRefs(store);
 const route = useRoute();
+const router = useRouter();
+
 onMounted(() => {
-  form.value = categories.value.find((x) => x.id === Number(route.params.id));
+  const category = categories.value.find((x) => x.id === Number(route.params.id));
+  if (category) {
+    form.value = { ...category };
+  }
 });
 
-function onSubmit() {
-  console.log('Onsubmit');
+async function onSubmit() {
+  if (!form.value) return;
+
+  try {
+    await store.updateCategory(form.value.id, { name: form.value.name });
+    await router.push('/categories');
+  } catch (error) {
+    console.error('Ошибка при обновлении:', error);
+  }
 }
 
-function onDelete() {
-  console.log('onDelete');
+async function onDelete() {
+  if (!form.value) return;
+
+  try {
+    await store.deleteCategory(form.value.id);
+    await router.push('/categories');
+  } catch (error) {
+    console.error('Ошибка при удалении:', error);
+  }
 }
 
 function onReset() {
-  console.log('OnReset');
+  if (!form.value) return;
+
+  const category = categories.value.find((x) => x.id === form.value?.id);
+  if (category) {
+    form.value.name = category.name;
+  }
 }
 </script>
 

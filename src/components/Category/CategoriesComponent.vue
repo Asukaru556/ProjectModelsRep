@@ -1,24 +1,25 @@
 <template>
   <div class="row justify-between">
     <div class="text-h6">Категории</div>
-    <q-btn color="primary">
-      <q-icon @click="$router.push(`categories/add`)" left size="3em" name="add_circle_outline" />
+    <q-btn @click="$router.push(`categories/add`)" color="primary">
+      <q-icon  left size="3em" name="add_circle_outline" />
       <div>Создать новую категорию</div>
     </q-btn>
   </div>
   <div class="q-py-md">
     <div
-      v-for="category in categories"
+      v-for="(category, index) in categories"
       :key="category.id"
       class="row items-center q-py-md q-px-sm cursor-pointer cat-block"
+      @click="$router.push(`categories/${category.id}`)"
     >
-      <div class="text-grey-8">#{{ category.id }}</div>
+      <div  class="text-grey-8">#{{ index + 1 }}</div>
       <div @click="$router.push(`categories/${category.id}`)" class="col q-px-md">
         {{ category.name }}
       </div>
       <div>
         <q-btn
-          @click="onDelete(category.id)"
+          @click.stop="onDelete(category.id)"
           unelevated
           round
           size="xs"
@@ -35,25 +36,16 @@ import { useCategoriesStore } from 'stores/categoryStore';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 
+const store = useCategoriesStore();
 const { categories } = storeToRefs(useCategoriesStore());
 
 onMounted(async () => {
-  await getCategories();
+  await store.fetchCategories();
 });
-async function getCategories() {
-  try {
-    const response = await fetch('http://localhost:3000/api/v1/categories');
-
-    const data = await response.json();
-    categories.value = data;
-  } catch (error) {
-    console.log(error);
-  }
+async function onDelete(id: number) {
+  await store.deleteCategory(id);
 }
 
-function onDelete(id: number) {
-  console.log('Delete', id);
-}
 </script>
 
 <style scoped>

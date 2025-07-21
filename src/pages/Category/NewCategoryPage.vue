@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import NewCategoryComponent from 'components/NewCategoryComponent.vue';
+import NewCategoryComponent from 'components/Category/NewCategoryComponent.vue';
 </script>
 
 <style scoped></style>

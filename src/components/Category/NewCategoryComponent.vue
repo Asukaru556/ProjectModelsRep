@@ -26,17 +26,28 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { ICategory } from 'components/models';
+import { useRouter } from 'vue-router';
+import { useCategoriesStore } from 'stores/categoryStore';
 
+const store = useCategoriesStore();
+const router = useRouter();
 const form = ref<Omit<ICategory, 'id'>>({
   name: '',
 });
 
-function onSubmit() {
-  console.log('Onsubmit');
+async function onSubmit() {
+  try {
+    await store.createCategory({ name: form.value.name });
+    await router.push('/categories'); // или другой путь назад
+  } catch (error) {
+    console.error('Ошибка при сохранении:', error);
+  }
 }
 
 function onReset() {
-  console.log('OnReset');
+  form.value = {
+    name: '',
+  };
 }
 </script>
 
