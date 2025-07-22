@@ -28,7 +28,6 @@
       ]"
     />
 
-    <!-- Выбор категории -->
     <q-select
       filled
       v-model="form.category_id"

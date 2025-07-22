@@ -71,7 +71,6 @@ async function onSubmit() {
 
     userStore.setUser({
       userId: response.userId,
-      username: response.username,
       email: response.email,
       token: response.token,
     });

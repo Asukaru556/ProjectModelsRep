@@ -4,7 +4,6 @@ import { Cookies } from 'quasar';
 
 export interface IUser {
   userId: number;
-  username: string;
   email: string;
   token: string;
 }
@@ -28,10 +27,9 @@ export const useUserStore = defineStore('user', () => {
 
   const setUser = (newUser: IUser) => {
     user.value = newUser;
-    Cookies.set('login_token', newUser.token);
-    Cookies.set('user_id', String(newUser.userId));
-    Cookies.set('username', newUser.username);
     Cookies.set('user_email', newUser.email);
+    Cookies.set('user_id', String(newUser.userId));
+    Cookies.set('login_token', newUser.token);
   };
 
   const clearUser = () => {

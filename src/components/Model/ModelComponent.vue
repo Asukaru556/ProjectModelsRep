@@ -24,6 +24,19 @@
       hint="Описание модели"
     />
 
+    <q-select
+      filled
+      v-model="form.category_id"
+      :options="categoriesOptions"
+      label="Категория"
+      option-value="id"
+      option-label="name"
+      emit-value
+      map-options
+      clearable
+      hint="Выберите категорию модели"
+    />
+
     <img v-if="imagePreviewUrl" :src="imagePreviewUrl" width="200" />
 
     <q-file
@@ -81,6 +94,11 @@ import type { NewModel, ModelFromAPI } from 'components/models';
 import { useModelsStore } from 'stores/modelsStore.js';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
+import type {CategoryOption} from 'components/models';
+import { useCategoriesStore } from 'stores/categoryStore';
+
+const categoriesStore = useCategoriesStore();
+const categoriesOptions = ref<CategoryOption[]>([]);
 
 const FileConstructor = window.File;
 const isFile = (val: unknown): val is File => val instanceof FileConstructor;
@@ -97,6 +115,11 @@ const imageLabel = ref('Выберите изображение');
 const modelLabel = ref('Выберите модель');
 
 onMounted(async () => {
+  await categoriesStore.fetchCategories();
+  categoriesOptions.value = categoriesStore.categories.map(cat => ({ id: cat.id, name: cat.name }));
+});
+
+onMounted(async () => {
   await modelsStore.fetchModels();
   const modelFromStore = models.value.find(x => x.id === Number(route.params.id));
   if (modelFromStore) {
@@ -106,7 +129,7 @@ onMounted(async () => {
       model_path: modelFromStore.model_path ?? null,
       tempImage: null,
       tempModel: null,
-      price: modelFromStore.price ?? null, // на всякий случай тоже
+      price: modelFromStore.price,
     };
     imagePreviewUrl.value = modelFromStore.image_path ?? null;
   }
@@ -161,6 +184,10 @@ async function onSubmit() {
     updateData.price = form.value.price;
   }
 
+  if (form.value.category_id !== undefined) {
+    updateData.category_id = form.value.category_id;
+  }
+
   updateData.image_path = form.value.tempImage && isFile(form.value.tempImage)
     ? form.value.tempImage.name
     : form.value.image_path ?? undefined;
@@ -182,10 +209,8 @@ async function onDelete() {
 
   try {
     await modelsStore.deleteModel(form.value.id);
-    alert('Модель удалена!');
     router.back();
   } catch (e) {
-    alert('Ошибка при удалении модели');
     console.error(e);
   }
 }
@@ -202,7 +227,6 @@ function onReset() {
   form.value.direct_purchase_url = '';
   imagePreviewUrl.value = null;
   updateLabels();
-  console.log('Форма очищена');
 }
 </script>
 

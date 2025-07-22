@@ -44,7 +44,7 @@ export interface ModelFromAPI {
   model_path: string | undefined;
   price: number;
   direct_purchase_url: string;
-  category_id: number;
+  category_id?: number | null;
 }
 
 export interface CategoryOption {

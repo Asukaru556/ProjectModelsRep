@@ -75,7 +75,6 @@ onMounted(async () => {
 
     userStore.setUser({
       userId: userData.id,
-      username: userData.username,
       email: userData.email,
       token: token
     });
