@@ -89,11 +89,11 @@ import { useQuasar } from 'quasar';
 import { api } from 'src/api/api';
 import { useRouter } from 'vue-router';
 import type { NewModel} from 'components/models';
-import type {CategoryOption} from 'components/models';
+import type {ICategory} from 'components/models';
 import { useCategoriesStore } from 'stores/categoryStore';
 
 const categoriesStore = useCategoriesStore();
-const categoriesOptions = ref<CategoryOption[]>([]);
+const categoriesOptions = ref<ICategory[]>([]);
 
 const $q = useQuasar();
 const router = useRouter();

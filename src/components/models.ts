@@ -47,8 +47,3 @@ export interface ModelFromAPI {
   category_id?: number | null;
 }
 
-export interface CategoryOption {
-  id: number;
-  name: string;
-}
-

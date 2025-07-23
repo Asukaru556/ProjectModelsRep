@@ -94,11 +94,11 @@ import type { NewModel, ModelFromAPI } from 'components/models';
 import { useModelsStore } from 'stores/modelsStore.js';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
-import type {CategoryOption} from 'components/models';
+import type {ICategory} from 'components/models';
 import { useCategoriesStore } from 'stores/categoryStore';
 
 const categoriesStore = useCategoriesStore();
-const categoriesOptions = ref<CategoryOption[]>([]);
+const categoriesOptions = ref<ICategory[]>([]);
 
 const FileConstructor = window.File;
 const isFile = (val: unknown): val is File => val instanceof FileConstructor;
