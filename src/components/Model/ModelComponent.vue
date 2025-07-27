@@ -80,9 +80,22 @@
 
     <div>
       <q-btn label="Обновить" type="submit" color="primary" />
-      <q-btn label="Удалить" color="red" class="q-ml-sm" @click="onDelete" />
+      <q-btn label="Удалить" color="red" class="q-ml-sm" @click="showDeleteConfirm = true" />
       <q-btn label="Очистить" type="reset" color="primary" flat class="q-ml-sm" />
     </div>
+    <q-dialog v-model="showDeleteConfirm" persistent>
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-avatar icon="delete" color="negative" text-color="white" />
+          <span class="q-ml-sm">Вы уверены, что хотите удалить модель?</span>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Отмена" color="primary" v-close-popup />
+          <q-btn flat label="Удалить" color="negative" @click="onDelete" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-form>
 
   <div v-else>Модель не найдена</div>
@@ -105,6 +118,7 @@ const isFile = (val: unknown): val is File => val instanceof FileConstructor;
 
 const form = ref<NewModel | undefined>(undefined);
 const imagePreviewUrl = ref<string | null>(null);
+const showDeleteConfirm = ref(false)
 
 const modelsStore = useModelsStore();
 const { models } = storeToRefs(modelsStore);
