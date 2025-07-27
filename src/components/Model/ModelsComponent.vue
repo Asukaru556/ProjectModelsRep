@@ -8,7 +8,6 @@
       </q-btn>
     </div>
 
-    <!-- Выпадающий список категорий -->
     <q-select
       filled
       v-model="selectedCategoryId"
@@ -28,7 +27,6 @@
         :key="model.id"
         class="row items-center q-py-md q-px-sm cursor-pointer cat-block"
       >
-        <!-- Порядковый номер -->
         <div class="text-grey-8 q-mr-sm">#{{ index + 1 }}</div>
 
         <div @click="$router.push(`/models/${model.id}`)" class="col q-px-md">
@@ -72,7 +70,6 @@ const { categories } = storeToRefs(categoriesStore);
 
 const selectedCategoryId = ref<number | null>(null);
 
-// Загружаем данные при монтировании
 onMounted(async () => {
   try {
     await categoriesStore.fetchCategories();
@@ -83,12 +80,10 @@ onMounted(async () => {
   }
 });
 
-// Массив категорий для селекта
 const categoriesOptions = computed(() =>
   categories.value.map(cat => ({ id: cat.id, name: cat.name }))
 );
 
-// Фильтрация моделей по выбранной категории
 const filteredModels = computed(() => {
   if (selectedCategoryId.value === null) {
     return models.value;
