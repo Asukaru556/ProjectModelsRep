@@ -51,7 +51,15 @@
           <div class="text-caption text-grey">Цена: {{ model.price }} ₽</div>
         </div>
 
-        <!-- Добавлен .stop для предотвращения всплытия события -->
+        <div class="q-mr-md" @click.stop>
+          <q-toggle
+            v-model="model.is_active"
+            :label="model.is_active ? 'Активна' : 'Неактивна'"
+            color="green"
+            @update:model-value="toggleModelActive(model.id, $event)"
+          />
+        </div>
+
         <q-btn
           label="Удалить"
           color="red"
@@ -63,7 +71,6 @@
       </div>
     </div>
 
-    <!-- Вынесенный диалог подтверждения удаления -->
     <q-dialog v-model="showDeleteConfirm" persistent>
       <q-card>
         <q-card-section class="row items-center">
@@ -103,7 +110,7 @@ const { categories } = storeToRefs(categoriesStore);
 
 const selectedCategoryId = ref<number | null>(null);
 const showDeleteConfirm = ref(false);
-const deleteModelId = ref<number | null>(null); // Для хранения id модели, которую хотят удалить
+const deleteModelId = ref<number | null>(null);
 
 onMounted(async () => {
   try {
@@ -142,6 +149,19 @@ async function onDelete() {
     console.error(e);
   } finally {
     deleteModelId.value = null;
+  }
+}
+
+async function toggleModelActive(modelId: number, isActive: boolean) {
+  try {
+    await modelsStore.updateModel(modelId, { is_active: isActive });
+    $q.notify({
+      type: 'positive',
+      message: `Модель ${isActive ? 'активирована' : 'деактивирована'}`
+    });
+  } catch (e) {
+    $q.notify({ type: 'negative', message: 'Ошибка при изменении статуса модели' });
+    console.error(e);
   }
 }
 </script>

@@ -94,7 +94,7 @@ async function onSubmit() {
       message: 'Регистрация успешна!',
     });
 
-    await router.push('/');
+    await router.push('/models');
   } catch (error: any) {
     console.error('Ошибка регистрации:', error);
     $q.notify({

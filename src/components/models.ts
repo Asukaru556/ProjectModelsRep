@@ -32,6 +32,7 @@ export interface NewModel {
   price: number | null;
   direct_purchase_url: string;
   category_id?: number | null;
+  is_active?: boolean;
   tempImage: File | null;
   tempModel: File | null;
 };
@@ -45,5 +46,6 @@ export interface ModelFromAPI {
   price: number;
   direct_purchase_url: string;
   category_id?: number | null;
+  is_active: boolean;
 }
 

@@ -80,7 +80,7 @@ async function onSubmit() {
       message: 'Авторизация успешна!',
     });
 
-    await router.push('/');
+    await router.push('/models');
   } catch (error: unknown) {
     console.error('Ошибка авторизации:', error);
     let errorMessage = 'Ошибка авторизации. Попробуйте снова.';

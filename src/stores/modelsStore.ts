@@ -76,11 +76,21 @@ export const useModelsStore = defineStore('model', () => {
     }
   };
 
+  const toggleModelActive = async (id: number, isActive: boolean) => {
+    try {
+      await updateModel(id, { is_active: isActive });
+    } catch (error) {
+      console.error('Ошибка при переключении активности модели:', error);
+      throw error;
+    }
+  };
+
   return {
     models,
     fetchModels,
     deleteModel,
     updateModel,
     createModel,
+    toggleModelActive,
   };
 });
