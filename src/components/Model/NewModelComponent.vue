@@ -41,6 +41,17 @@
       hint="Выберите категорию модели"
     />
 
+    <q-input
+      filled
+      v-model.number="form.position"
+      type="number"
+      label="Позиция"
+      hint="Порядковый номер для сортировки"
+      :rules="[
+        val => val >= 0 || 'Позиция должна быть неотрицательной',
+      ]"
+    />
+
     <img width="200" v-if="imagePreviewUrl" :src="imagePreviewUrl" class="q-mb-sm" />
     <q-file label="Загрузите картинку" filled v-model="form.tempImage">
       <template v-slot:prepend>
@@ -74,6 +85,13 @@
       :rules="[
         val => !val || /^https?:\/\/.+/.test(val) || 'Введите корректную ссылку (http/https)',
       ]"
+    />
+
+    <q-checkbox
+      v-model="form.is_stock"
+      label="Стоковая модель"
+      :true-value="true"
+      :false-value="false"
     />
 
     <div>
@@ -113,6 +131,8 @@ const form = ref<NewModel>({
   category_id: null,
   tempImage: null,
   tempModel: null,
+  is_stock: false,
+  position: 0,
 });
 
 const imagePreviewUrl = ref<string | null>(null);
@@ -190,7 +210,10 @@ async function onSubmit() {
       price: form.value.price ?? 0,
       direct_purchase_url: form.value.direct_purchase_url ?? '',
       category_id: form.value.category_id,
+      is_stock: form.value.is_stock,
+      position: form.value.position ?? 0,
     };
+    console.log('Отправляемые данные:', payload);
 
     await api.post('/models', payload);
 
@@ -218,6 +241,8 @@ function onReset() {
     category_id: null,
     tempImage: null,
     tempModel: null,
+    is_stock: false,
+    position: 0,
   };
 }
 </script>

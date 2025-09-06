@@ -35,6 +35,8 @@ export interface NewModel {
   is_active?: boolean;
   tempImage: File | null;
   tempModel: File | null;
+  is_stock: boolean;
+  position: number;
 };
 
 export interface ModelFromAPI {
@@ -47,5 +49,7 @@ export interface ModelFromAPI {
   direct_purchase_url: string;
   category_id?: number | null;
   is_active: boolean;
+  is_stock: boolean;
+  position: number;
 }
 

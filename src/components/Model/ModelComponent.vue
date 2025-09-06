@@ -37,6 +37,17 @@
       hint="Выберите категорию модели"
     />
 
+    <q-input
+      filled
+      v-model.number="form.position"
+      type="number"
+      label="Позиция"
+      hint="Порядковый номер для сортировки"
+      :rules="[
+        val => val >= 0 || 'Позиция должна быть неотрицательной',
+      ]"
+    />
+
     <img v-if="imagePreviewUrl" :src="imagePreviewUrl" width="200" />
 
     <q-file
@@ -76,6 +87,13 @@
       label="Ссылка на магазин"
       hint="URL"
       type="url"
+    />
+
+    <q-checkbox
+      v-model="form.is_stock"
+      label="Стоковая модель"
+      :true-value="true"
+      :false-value="false"
     />
 
     <div>
@@ -144,6 +162,8 @@ onMounted(async () => {
       tempImage: null,
       tempModel: null,
       price: modelFromStore.price,
+      is_stock: modelFromStore.is_stock || false,
+      position: modelFromStore.position || 0,
     };
     imagePreviewUrl.value = modelFromStore.image_path ?? null;
   }
@@ -192,6 +212,8 @@ async function onSubmit() {
     title: form.value.title,
     description: form.value.description,
     direct_purchase_url: form.value.direct_purchase_url,
+    is_stock: form.value.is_stock,
+    position: form.value.position,
   };
 
   if (form.value.price !== null && form.value.price !== undefined) {
@@ -239,6 +261,7 @@ function onReset() {
   form.value.tempModel = null;
   form.value.price = null;
   form.value.direct_purchase_url = '';
+  form.value.is_stock = false;
   imagePreviewUrl.value = null;
   updateLabels();
 }

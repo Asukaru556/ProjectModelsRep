@@ -22,51 +22,63 @@
     />
 
     <div class="q-py-md">
-      <div
-        v-for="(model, index) in filteredModels"
-        :key="model.id"
-        class="row items-center q-py-md q-px-sm cursor-pointer cat-block"
-        @click="$router.push(`/models/${model.id}`)"
+      <draggable
+        :list="localModels"
+        item-key="id"
+        @end="onDragEnd"
+        handle=".drag-handle"
       >
-        <div class="text-grey-8 q-mr-sm">#{{ index + 1 }}</div>
-
-        <div class="q-mr-md" style="width: 200px; height: 150px;">
-          <img
-            v-if="model.image_path"
-            :src="model.image_path"
-            class="full-width full-height"
-            style="object-fit: cover; border-radius: 4px;"
-          />
+        <template #item="{ element: model, index }">
           <div
-            v-else
-            class="full-width full-height bg-grey-4 flex flex-center text-grey-6"
-            style="border-radius: 4px;"
+            class="row items-center q-py-md q-px-sm cursor-pointer cat-block"
+            @click="$router.push(`/models/${model.id}`)"
           >
-            <q-icon name="image_not_supported" size="sm" />
+            <div class="drag-handle q-mr-sm" style="cursor: grab;">
+              <q-icon name="drag_handle" size="sm" class="text-grey-6" />
+            </div>
+
+            <div class="text-grey-8 q-mr-sm">#{{ index + 1 }}</div>
+
+            <div class="q-mr-md" style="width: 200px; height: 150px;">
+              <img
+                v-if="model.image_path"
+                :src="model.image_path"
+                class="full-width full-height"
+                style="object-fit: cover; border-radius: 4px;"
+              />
+              <div
+                v-else
+                class="full-width full-height bg-grey-4 flex flex-center text-grey-6"
+                style="border-radius: 4px;"
+              >
+                <q-icon name="image_not_supported" size="sm" />
+              </div>
+            </div>
+
+            <div class="col q-px-md">
+              <div class="text-weight-medium">{{ model.title }}</div>
+              <div class="text-caption text-grey">Цена: {{ model.price }} ₽</div>
+            </div>
+
+            <div class="q-mr-md" @click.stop>
+              <q-toggle
+                :model-value="model.is_active"
+                :label="model.is_active ? 'Активна' : 'Неактивна'"
+                color="green"
+                @update:model-value="toggleModelActive(model.id, $event)"
+              />
+            </div>
+
+            <q-btn
+              label="Удалить"
+              color="red"
+              @click.stop="confirmDelete(model.id)"
+            />
           </div>
-        </div>
+        </template>
+      </draggable>
 
-        <div class="col q-px-md">
-          <div class="text-weight-medium">{{ model.title }}</div>
-          <div class="text-caption text-grey">Цена: {{ model.price }} ₽</div>
-        </div>
-
-        <div class="q-mr-md" @click.stop>
-          <q-toggle
-            v-model="model.is_active"
-            :label="model.is_active ? 'Активна' : 'Неактивна'"
-            color="green"
-            @update:model-value="toggleModelActive(model.id, $event)"
-          />
-        </div>
-
-        <q-btn
-          label="Удалить"
-          color="red"
-          @click.stop="confirmDelete(model.id)"
-        />
-      </div>
-      <div v-if="filteredModels.length === 0" class="text-grey q-pa-md text-center">
+      <div v-if="localModels.length === 0" class="text-grey q-pa-md text-center">
         Модели не найдены
       </div>
     </div>
@@ -94,14 +106,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useModelsStore } from 'stores/modelsStore';
 import { useCategoriesStore } from 'stores/categoryStore';
 import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
+import draggable from 'vuedraggable';
 
 const $q = useQuasar();
-
 const modelsStore = useModelsStore();
 const categoriesStore = useCategoriesStore();
 
@@ -111,11 +123,13 @@ const { categories } = storeToRefs(categoriesStore);
 const selectedCategoryId = ref<number | null>(null);
 const showDeleteConfirm = ref(false);
 const deleteModelId = ref<number | null>(null);
+const localModels = ref<any[]>([]);
 
 onMounted(async () => {
   try {
     await categoriesStore.fetchCategories();
     await modelsStore.fetchModels();
+    localModels.value = [...filteredModels.value];
   } catch (error) {
     console.error(error);
     $q.notify({ type: 'negative', message: 'Ошибка при загрузке данных' });
@@ -127,11 +141,48 @@ const categoriesOptions = computed(() =>
 );
 
 const filteredModels = computed(() => {
-  if (selectedCategoryId.value === null) {
-    return models.value;
+  let filtered = models.value;
+  if (selectedCategoryId.value !== null) {
+    filtered = filtered.filter(m => m.category_id === selectedCategoryId.value);
   }
-  return models.value.filter(m => m.category_id === selectedCategoryId.value);
+  return filtered.sort((a, b) => a.position - b.position);
 });
+
+watch(filteredModels, (newValue) => {
+  localModels.value = [...newValue];
+}, { immediate: true });
+
+async function onDragEnd(event: any) {
+  if (event.oldIndex === event.newIndex) return;
+
+  try {
+    const movedItem = localModels.value[event.newIndex];
+
+    const prevItem = localModels.value[event.newIndex - 1];
+    const nextItem = localModels.value[event.newIndex + 1];
+
+    let newPosition;
+
+    if (!prevItem) {
+      newPosition = nextItem.position - 1;
+    } else if (!nextItem) {
+      newPosition = prevItem.position + 1;
+    } else {
+      // где-то в середине
+      newPosition = (prevItem.position + nextItem.position) / 2;
+    }
+
+    await modelsStore.updateModel(movedItem.id, { position: newPosition });
+
+    $q.notify({ type: 'positive', message: 'Позиция модели обновлена' });
+
+    await modelsStore.fetchModels();
+  } catch (error) {
+    console.error('Ошибка при обновлении позиции:', error);
+    $q.notify({ type: 'negative', message: 'Ошибка при обновлении позиции' });
+    await modelsStore.fetchModels();
+  }
+}
 
 function confirmDelete(id: number) {
   deleteModelId.value = id;
@@ -140,7 +191,6 @@ function confirmDelete(id: number) {
 
 async function onDelete() {
   if (deleteModelId.value === null) return;
-
   try {
     await modelsStore.deleteModel(deleteModelId.value);
     $q.notify({ type: 'positive', message: 'Модель удалена' });
@@ -173,5 +223,8 @@ async function toggleModelActive(modelId: number, isActive: boolean) {
 }
 .cat-block:hover {
   background: #efeded;
+}
+.drag-handle:hover {
+  color: #1976d2;
 }
 </style>
