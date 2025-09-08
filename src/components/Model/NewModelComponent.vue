@@ -23,8 +23,6 @@
       label="Описание"
       hint="Краткое описание модели"
       :rules="[
-        val => (val && val.length > 0) || 'Поле обязательно!',
-        val => (val && val.length < 1000) || 'Не более 1000 символов',
       ]"
     />
 
@@ -87,11 +85,29 @@
       ]"
     />
 
+    <q-input
+      filled
+      v-model="form.button_name"
+      label="Название кнопки"
+      hint="Текст на кнопке покупки"
+      :rules="[
+    val => (val && val.length < 50) || 'Не более 50 символов',
+  ]"
+    />
+
     <q-checkbox
       v-model="form.is_stock"
       label="Стоковая модель"
       :true-value="true"
       :false-value="false"
+    />
+
+    <q-toggle
+      v-model="form.is_active"
+      label="Активная модель"
+      :true-value="true"
+      :false-value="false"
+      color="green"
     />
 
     <div>
@@ -133,6 +149,8 @@ const form = ref<NewModel>({
   tempModel: null,
   is_stock: false,
   position: 0,
+  button_name: '',
+  is_active: true,
 });
 
 const imagePreviewUrl = ref<string | null>(null);
@@ -204,14 +222,16 @@ async function onSubmit() {
 
     const payload = {
       title: form.value.title,
-      description: form.value.description,
+      description: form.value.description || '',
       image_path: form.value.image_path ?? '',
       model_path: form.value.model_path ?? '',
       price: form.value.price ?? 0,
       direct_purchase_url: form.value.direct_purchase_url ?? '',
       category_id: form.value.category_id,
+      is_active: form.value.is_active,
       is_stock: form.value.is_stock,
       position: form.value.position ?? 0,
+      button_name: form.value.button_name,
     };
     console.log('Отправляемые данные:', payload);
 
@@ -243,6 +263,8 @@ function onReset() {
     tempModel: null,
     is_stock: false,
     position: 0,
+    button_name: 'Ваша кнопка',
+    is_active: true,
   };
 }
 </script>

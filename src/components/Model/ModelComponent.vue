@@ -88,6 +88,16 @@
       hint="URL"
       type="url"
     />
+    <q-input
+      filled
+      v-model="form.button_name"
+      label="Название кнопки"
+      hint="Текст на кнопке действия"
+      :rules="[
+        (val) => (val && val.length > 0) || 'Поле является обязательным!',
+        (val) => (val && val.length < 256) || 'Должно быть не больше 256 символов!',
+      ]"
+    />
 
     <q-checkbox
       v-model="form.is_stock"
@@ -96,10 +106,20 @@
       :false-value="false"
     />
 
+    <q-toggle
+      v-model="form.is_active"
+      label="Активная модель"
+      :true-value="true"
+      :false-value="false"
+      color="green"
+    />
+
     <div>
       <q-btn label="Обновить" type="submit" color="primary" />
       <q-btn label="Удалить" color="red" class="q-ml-sm" @click="showDeleteConfirm = true" />
       <q-btn label="Очистить" type="reset" color="primary" flat class="q-ml-sm" />
+      <q-btn :label="form?.button_name || 'Ваша кнопка'" color="primary" />
+
     </div>
     <q-dialog v-model="showDeleteConfirm" persistent>
       <q-card>
@@ -162,8 +182,10 @@ onMounted(async () => {
       tempImage: null,
       tempModel: null,
       price: modelFromStore.price,
+      is_active: modelFromStore.is_active || true,
       is_stock: modelFromStore.is_stock || false,
       position: modelFromStore.position || 0,
+      button_name: modelFromStore.button_name || 'Ваша кнопка',
     };
     imagePreviewUrl.value = modelFromStore.image_path ?? null;
   }
@@ -210,11 +232,19 @@ async function onSubmit() {
 
   const updateData: Partial<ModelFromAPI> = {
     title: form.value.title,
-    description: form.value.description,
     direct_purchase_url: form.value.direct_purchase_url,
     is_stock: form.value.is_stock,
     position: form.value.position,
+    button_name: form.value.button_name,
   };
+
+  if (form.value.is_active !== undefined) {
+    updateData.is_active = form.value.is_active;
+  }
+
+  if (form.value.description !== undefined) {
+    updateData.description = form.value.description;
+  }
 
   if (form.value.price !== null && form.value.price !== undefined) {
     updateData.price = form.value.price;
@@ -261,7 +291,9 @@ function onReset() {
   form.value.tempModel = null;
   form.value.price = null;
   form.value.direct_purchase_url = '';
+  form.value.is_active = true;
   form.value.is_stock = false;
+  form.value.button_name = "Ваша кнопка"
   imagePreviewUrl.value = null;
   updateLabels();
 }

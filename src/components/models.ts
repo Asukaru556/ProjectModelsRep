@@ -26,7 +26,7 @@ export interface ICategory {
 export interface NewModel {
   id?: number;
   title: string;
-  description: string;
+  description?: string;
   image_path: string | null;
   model_path: string | null;
   price: number | null;
@@ -37,12 +37,13 @@ export interface NewModel {
   tempModel: File | null;
   is_stock: boolean;
   position: number;
+  button_name: string;
 };
 
 export interface ModelFromAPI {
   id: number;
   title: string;
-  description: string;
+  description?: string;
   image_path: string | undefined;
   model_path: string | undefined;
   price: number;
@@ -51,5 +52,6 @@ export interface ModelFromAPI {
   is_active: boolean;
   is_stock: boolean;
   position: number;
+  button_name: string,
 }
 

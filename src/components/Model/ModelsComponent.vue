@@ -60,15 +60,6 @@
               <div class="text-caption text-grey">Цена: {{ model.price }} ₽</div>
             </div>
 
-            <div class="q-mr-md" @click.stop>
-              <q-toggle
-                :model-value="model.is_active"
-                :label="model.is_active ? 'Активна' : 'Неактивна'"
-                color="green"
-                @update:model-value="toggleModelActive(model.id, $event)"
-              />
-            </div>
-
             <q-btn
               label="Удалить"
               color="red"
@@ -168,7 +159,6 @@ async function onDragEnd(event: any) {
     } else if (!nextItem) {
       newPosition = prevItem.position + 1;
     } else {
-      // где-то в середине
       newPosition = (prevItem.position + nextItem.position) / 2;
     }
 
@@ -199,19 +189,6 @@ async function onDelete() {
     console.error(e);
   } finally {
     deleteModelId.value = null;
-  }
-}
-
-async function toggleModelActive(modelId: number, isActive: boolean) {
-  try {
-    await modelsStore.updateModel(modelId, { is_active: isActive });
-    $q.notify({
-      type: 'positive',
-      message: `Модель ${isActive ? 'активирована' : 'деактивирована'}`
-    });
-  } catch (e) {
-    $q.notify({ type: 'negative', message: 'Ошибка при изменении статуса модели' });
-    console.error(e);
   }
 }
 </script>
