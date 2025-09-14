@@ -31,9 +31,9 @@ const baseURL = '/models'
   return api.patch<void>(`${baseURL}/positions`, { models })
 }
 
- async function uploadFileModelApi(file: File): Promise<{ modelUrl: string }> {
+async function uploadFileModelApi(file: File): Promise<{ modelUrl: string }> {
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('model', file); // 👈 меняем с "file" на "model"
   return api.post<{ modelUrl: string }>('/upload/models', formData);
 }
 

@@ -146,31 +146,21 @@ watch(filteredModels, (newValue) => {
 async function onDragEnd(event: any) {
   if (event.oldIndex === event.newIndex) return;
 
+  localModels.value.forEach((model, index) => {
+    model.position = index + 1;
+  });
+
+  const modelsToUpdate = localModels.value.map(model => ({
+    id: model.id,
+    position: model.position
+  }));
+
   try {
-    const movedItem = localModels.value[event.newIndex];
-
-    const prevItem = localModels.value[event.newIndex - 1];
-    const nextItem = localModels.value[event.newIndex + 1];
-
-    let newPosition;
-
-    if (!prevItem) {
-      newPosition = nextItem.position - 1;
-    } else if (!nextItem) {
-      newPosition = prevItem.position + 1;
-    } else {
-      newPosition = (prevItem.position + nextItem.position) / 2;
-    }
-
-    await modelsStore.updateModel(movedItem.id, { position: newPosition });
-
-    $q.notify({ type: 'positive', message: 'Позиция модели обновлена' });
-
-    await modelsStore.fetchModels();
+    await modelsStore.updateModelsPositions(modelsToUpdate);
+    $q.notify({ type: 'positive', message: 'Порядок моделей обновлён' });
   } catch (error) {
-    console.error('Ошибка при обновлении позиции:', error);
-    $q.notify({ type: 'negative', message: 'Ошибка при обновлении позиции' });
-    await modelsStore.fetchModels();
+    console.error('Ошибка при обновлении порядка моделей:', error);
+    $q.notify({ type: 'negative', message: 'Ошибка при обновлении порядка моделей' });
   }
 }
 
@@ -181,9 +171,23 @@ function confirmDelete(id: number) {
 
 async function onDelete() {
   if (deleteModelId.value === null) return;
+
   try {
     await modelsStore.deleteModel(deleteModelId.value);
-    $q.notify({ type: 'positive', message: 'Модель удалена' });
+    localModels.value = localModels.value.filter(m => m.id !== deleteModelId.value);
+
+    localModels.value.forEach((model, index) => {
+      model.position = index + 1;
+    });
+
+    const updatedPositions = localModels.value.map(model => ({
+      id: model.id,
+      position: model.position
+    }));
+
+    await modelsStore.updateModelsPositions(updatedPositions);
+
+    $q.notify({ type: 'positive', message: 'Модель удалена и порядок обновлён' });
   } catch (e) {
     $q.notify({ type: 'negative', message: 'Ошибка при удалении модели' });
     console.error(e);

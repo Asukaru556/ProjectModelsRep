@@ -23,3 +23,11 @@ export function updateCategoryApi(id: number, data: CreateCategory) {
 export function deleteCategoryApi(id: number) {
   return api.delete<void>(`${baseURL}/${id}`)
 }
+
+export const modelApi = {
+  createCategoryApi,
+  getCategoriesApi,
+  getCategoryApi,
+  updateCategoryApi,
+  deleteCategoryApi,
+}
