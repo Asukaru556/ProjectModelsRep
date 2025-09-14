@@ -142,12 +142,15 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
 import type { NewModel, ModelFromAPI } from 'components/models';
+import { useQuasar } from 'quasar';
 import { useModelsStore } from 'stores/modelsStore.js';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 import type {ICategory} from 'components/models';
 import { useCategoriesStore } from 'stores/categoryStore';
 
+
+const $q = useQuasar();
 const categoriesStore = useCategoriesStore();
 const categoriesOptions = ref<ICategory[]>([]);
 
@@ -230,43 +233,33 @@ function updateLabels() {
 async function onSubmit() {
   if (!form.value || form.value.id === undefined) return;
 
-  const updateData: Partial<ModelFromAPI> = {
+  const updateData = {
     title: form.value.title,
     direct_purchase_url: form.value.direct_purchase_url,
     is_stock: form.value.is_stock,
     position: form.value.position,
     button_name: form.value.button_name,
-  };
-
-  if (form.value.is_active !== undefined) {
-    updateData.is_active = form.value.is_active;
-  }
-
-  if (form.value.description !== undefined) {
-    updateData.description = form.value.description;
-  }
-
-  if (form.value.price !== null && form.value.price !== undefined) {
-    updateData.price = form.value.price;
-  }
-
-  if (form.value.category_id !== undefined) {
-    updateData.category_id = form.value.category_id;
-  }
-
-  updateData.image_path = form.value.tempImage && isFile(form.value.tempImage)
-    ? form.value.tempImage.name
-    : form.value.image_path ?? undefined;
-
-  updateData.model_path = form.value.tempModel && isFile(form.value.tempModel)
-    ? form.value.tempModel.name
-    : form.value.model_path ?? undefined;
+    description: form.value.description,
+    price: form.value.price ?? undefined,
+    category_id: form.value.category_id,
+    is_active: form.value.is_active,
+  } as Partial<ModelFromAPI>;
 
   try {
+    if (form.value.tempImage && isFile(form.value.tempImage)) {
+      await modelsStore.uploadImageModel(form.value.id, form.value.tempImage);
+    }
+
+    if (form.value.tempModel && isFile(form.value.tempModel)) {
+      await modelsStore.uploadFileModel(form.value.id, form.value.tempModel);
+    }
+
     await modelsStore.updateModel(form.value.id, updateData);
-    router.back()
+    $q.notify({ type: 'positive', message: 'Модель обновлена' });
+    router.back();
   } catch (e) {
     console.error(e);
+    $q.notify({ type: 'negative', message: 'Ошибка при обновлении модели' });
   }
 }
 

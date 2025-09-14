@@ -1,113 +1,94 @@
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
-import type { ModelFromAPI } from 'components/models';
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import type { ModelFromAPI } from 'components/models'
+import { modelApi } from 'src/api/modelApi'
 
-
-
-export const useModelsStore = defineStore('model', () => {
-  const models = ref<ModelFromAPI[]>([]);
+export const useModelsStore = defineStore('models', () => {
+  const models = ref<ModelFromAPI[]>([])
 
   const fetchModels = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/v1/models/');
-      const data = await res.json();
-      models.value = data;
+      const data = await modelApi.getModels()
+      models.value = data
     } catch (error) {
-      console.error('Ошибка при загрузке моделей:', error);
+      console.error('Ошибка при загрузке моделей:', error)
     }
-  };
+  }
+
+  const fetchModel = async (id: number) => {
+    try {
+      return await modelApi.getModel(id)
+    } catch (error) {
+      console.error('Ошибка при загрузке модели:', error)
+      return null
+    }
+  }
+
+  const createModel = async (payload: Partial<ModelFromAPI>) => {
+    try {
+      await modelApi.createModelApi(payload)
+      await fetchModels()
+    } catch (error) {
+      console.error('Ошибка при добавлении модели:', error)
+    }
+  }
+
+  const updateModel = async (id: number, payload: Partial<ModelFromAPI>) => {
+    try {
+      await modelApi.updateModelApi(id, payload)
+      await fetchModels()
+    } catch (error) {
+      console.error('Ошибка при обновлении модели:', error)
+    }
+  }
 
   const deleteModel = async (id: number) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/v1/models/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || 'Ошибка удаления модели');
-      }
-
-      models.value = models.value.filter((m) => m.id !== id);
+      await modelApi.deleteModelApi(id)
+      models.value = models.value.filter(m => m.id !== id)
     } catch (error) {
-      console.error('Ошибка при удалении модели:', error);
+      console.error('Ошибка при удалении модели:', error)
     }
-  };
-
-  const updateModel = async (id: number, data: Partial<ModelFromAPI>) => {
-    try {
-      const res = await fetch(`http://localhost:3000/api/v1/models/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || 'Ошибка при обновлении модели');
-      }
-
-      await fetchModels();
-    } catch (error) {
-      console.error('Ошибка при обновлении модели:', error);
-    }
-  };
-
-  const createModel = async (data: Partial<ModelFromAPI>) => {
-    try {
-      const res = await fetch('http://localhost:3000/api/v1/models/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || 'Ошибка при добавлении модели');
-      }
-
-      await fetchModels();
-    } catch (error) {
-      console.error('Ошибка при добавлении модели:', error);
-    }
-  };
+  }
 
   const toggleModelActive = async (id: number, isActive: boolean) => {
     try {
-      await updateModel(id, { is_active: isActive });
+      await modelApi.toggleModelActiveApi(id, isActive)
+      await fetchModels()
     } catch (error) {
-      console.error('Ошибка при переключении активности модели:', error);
+      console.error('Ошибка при переключении активности модели:', error)
+    }
+  }
+
+  const updateModelsPositions = async (modelsToUpdate: Array<{ id: number; position: number }>) => {
+    try {
+      await modelApi.updateModelsPositionsApi(modelsToUpdate)
+      // локально обновляем порядок
+      models.value = models.value.map(model => {
+        const updated = modelsToUpdate.find(m => m.id === model.id)
+        return updated ? { ...model, position: updated.position } : model
+      })
+    } catch (error) {
+      console.error('Ошибка при обновлении позиций моделей:', error)
+    }
+  }
+
+  const uploadFileModel = async (file: File): Promise<string> => {
+    try {
+      const response = await modelApi.uploadFileModelApi(file);
+      return response.modelUrl;
+    } catch (error) {
+      console.error('Ошибка при загрузке модели:', error);
       throw error;
     }
   };
 
-  const updateModelsPositions = async (modelsToUpdate: Array<{ id: number; position: number }>) => {
+  const uploadImageModel = async (file: File): Promise<string> => {
     try {
-      const res = await fetch('http://localhost:3000/api/v1/models/positions', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ models: modelsToUpdate }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || 'Ошибка при обновлении позиций');
-      }
-
-      // Важно: обновляем локальное состояние
-      models.value = models.value.map(model => {
-        const updatedModel = modelsToUpdate.find(m => m.id === model.id);
-        return updatedModel ? { ...model, position: updatedModel.position } : model;
-      });
-
+      const response = await modelApi.uploadImageModelApi(file);
+      return response.imageUrl;
     } catch (error) {
-      console.error('Ошибка при обновлении позиций моделей:', error);
+      console.error('Ошибка при загрузке изображения:', error);
       throw error;
     }
   };
@@ -115,10 +96,13 @@ export const useModelsStore = defineStore('model', () => {
   return {
     models,
     fetchModels,
-    deleteModel,
-    updateModel,
+    fetchModel,
     createModel,
+    updateModel,
+    deleteModel,
     toggleModelActive,
     updateModelsPositions,
-  };
-});
+    uploadFileModel,
+    uploadImageModel
+  }
+})

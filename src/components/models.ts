@@ -23,6 +23,10 @@ export interface ICategory {
   name: string;
 }
 
+export interface CreateCategory {
+  name: string;
+}
+
 export interface NewModel {
   id?: number;
   title: string;

@@ -73,7 +73,6 @@ class ApiClient {
       return JSON.parse(text);
     } catch (err) {
       console.log(err)
-      // Если не JSON, возвращаем текст как есть
       return text as unknown as T;
     }
   }
@@ -125,7 +124,5 @@ class ApiClient {
   }
 }
 
-// Создание экземпляра API
-//export const api = new ApiClient(import.meta.env.VITE_API_BASE_URL, 'http://localhost:3000/api/v1')
-
+//export const api = new ApiClient( import.meta.env.VITE_API_BASE_URL)
 export const api = new ApiClient( 'http://localhost:3000/api/v1')

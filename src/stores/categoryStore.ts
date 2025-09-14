@@ -1,77 +1,69 @@
-import { defineStore } from 'pinia';
-import type { ICategory } from 'components/models';
-import { ref } from 'vue';
+import { defineStore } from 'pinia'
+import type { ICategory, CreateCategory } from 'components/models'
+import { ref } from 'vue'
+import {
+  createCategoryApi,
+  getCategoriesApi,
+  getCategoryApi,
+  updateCategoryApi,
+  deleteCategoryApi
+} from 'src/api/categoryApi'
 
 export const useCategoriesStore = defineStore('category', () => {
-  const categories = ref<ICategory[]>([]);
+  const categories = ref<ICategory[]>([])
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/v1/categories');
-      const data = await res.json();
-      categories.value = data;
+      const data = await getCategoriesApi()
+      categories.value = data
     } catch (error) {
-      console.error('Ошибка при загрузке категорий:', error);
+      console.error('Ошибка при загрузке категорий:', error)
     }
-  };
+  }
+
+  const fetchCategory = async (id: number) => {
+    try {
+      const data = await getCategoryApi(id)
+      return data
+    } catch (error) {
+      console.error('Ошибка при загрузке категории:', error)
+      return null
+    }
+  }
+
+  const createCategory = async (payload: CreateCategory) => {
+    try {
+      await createCategoryApi(payload)
+      await fetchCategories()
+    } catch (error) {
+      console.error('Ошибка при добавлении категории:', error)
+    }
+  }
+
+  const updateCategory = async (id: number, payload: CreateCategory) => {
+    try {
+      await updateCategoryApi(id, payload)
+      await fetchCategories()
+    } catch (error) {
+      console.error('Ошибка при обновлении категории:', error)
+    }
+  }
 
   const deleteCategory = async (id: number) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/v1/categories/${id}`, {
-        method: 'DELETE',
-        headers: {
-        },
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || 'Ошибка удаления');
-      }
-
-      categories.value = categories.value.filter((c) => c.id !== id);
+      await deleteCategoryApi(id)
+      categories.value = categories.value.filter(c => c.id !== id)
     } catch (error) {
-      console.error('Ошибка при удалении категории:', error);
+      console.error('Ошибка при удалении категории:', error)
     }
-  };
-
-  async function updateCategory(id: number, data: { name: string }) {
-    await fetch(`http://localhost:3000/api/v1/categories/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    await fetchCategories();
   }
-
-  const createCategory = async (data: { name: string }) => {
-    try {
-      const res = await fetch('http://localhost:3000/api/v1/categories/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || 'Ошибка при добавлении категории');
-      }
-
-      await fetchCategories();
-    } catch (error) {
-      console.error('Ошибка при добавлении категории:', error);
-    }
-  };
 
   return {
     categories,
     fetchCategories,
-    deleteCategory,
-    updateCategory,
+    fetchCategory,
     createCategory,
-  };
-});
+    updateCategory,
+    deleteCategory
+  }
+})

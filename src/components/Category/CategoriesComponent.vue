@@ -13,8 +13,8 @@
       class="row items-center q-py-md q-px-sm cursor-pointer cat-block"
       @click="$router.push(`categories/${category.id}`)"
     >
-      <div  class="text-grey-8">#{{ index + 1 }}</div>
-      <div @click="$router.push(`categories/${category.id}`)" class="col q-px-md">
+      <div class="text-grey-8">#{{ index + 1 }}</div>
+      <div class="col q-px-md">
         {{ category.name }}
       </div>
       <div>
@@ -32,20 +32,20 @@
 </template>
 
 <script setup lang="ts">
-import { useCategoriesStore } from 'stores/categoryStore';
-import { storeToRefs } from 'pinia';
-import { onMounted } from 'vue';
+import { useCategoriesStore } from 'stores/categoryStore'
+import { storeToRefs } from 'pinia'
+import { onMounted } from 'vue'
 
-const store = useCategoriesStore();
-const { categories } = storeToRefs(useCategoriesStore());
+const store = useCategoriesStore()
+const { categories } = storeToRefs(store)
 
 onMounted(async () => {
-  await store.fetchCategories();
-});
-async function onDelete(id: number) {
-  await store.deleteCategory(id);
-}
+  await store.fetchCategories()
+})
 
+async function onDelete(id: number) {
+  await store.deleteCategory(id)
+}
 </script>
 
 <style scoped>

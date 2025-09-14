@@ -26,55 +26,40 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import type { ICategory } from 'components/models';
-import { useCategoriesStore } from 'stores/categoryStore';
-import { storeToRefs } from 'pinia';
-import { useRoute, useRouter  } from 'vue-router';
+import { onMounted, ref } from 'vue'
+import type { ICategory } from 'components/models'
+import { useCategoriesStore } from 'stores/categoryStore'
+import { storeToRefs } from 'pinia'
+import { useRoute, useRouter } from 'vue-router'
 
-const form = ref<ICategory | undefined>(undefined);
+const form = ref<ICategory | undefined>()
 
-const store = useCategoriesStore();
-const { categories } = storeToRefs(store);
-const route = useRoute();
-const router = useRouter();
+const store = useCategoriesStore()
+const { categories } = storeToRefs(store)
+const route = useRoute()
+const router = useRouter()
 
 onMounted(() => {
-  const category = categories.value.find((x) => x.id === Number(route.params.id));
-  if (category) {
-    form.value = { ...category };
-  }
-});
+  const category = categories.value.find(x => x.id === Number(route.params.id))
+  if (category) form.value = { ...category }
+})
 
 async function onSubmit() {
-  if (!form.value) return;
-
-  try {
-    await store.updateCategory(form.value.id, { name: form.value.name });
-    await router.push('/categories');
-  } catch (error) {
-    console.error('Ошибка при обновлении:', error);
-  }
+  if (!form.value) return
+  await store.updateCategory(form.value.id, { name: form.value.name })
+  await router.push('/categories')
 }
 
 async function onDelete() {
-  if (!form.value) return;
-
-  try {
-    await store.deleteCategory(form.value.id);
-    await router.push('/categories');
-  } catch (error) {
-    console.error('Ошибка при удалении:', error);
-  }
+  if (!form.value) return
+  await store.deleteCategory(form.value.id)
+  await router.push('/categories')
 }
 
 function onReset() {
   if (!form.value) return;
-
   const category = categories.value.find((x) => x.id === form.value?.id);
-  if (category) {
-    form.value.name = category.name;
-  }
+  if (category) { form.value.name = category.name; }
 }
 </script>
 

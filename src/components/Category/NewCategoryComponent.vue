@@ -27,9 +27,8 @@
 import { ref } from 'vue';
 import type { ICategory } from 'components/models';
 import { useRouter } from 'vue-router';
-import { useCategoriesStore } from 'stores/categoryStore';
+import {createCategoryApi} from "src/api/categoryApi";
 
-const store = useCategoriesStore();
 const router = useRouter();
 const form = ref<Omit<ICategory, 'id'>>({
   name: '',
@@ -37,10 +36,10 @@ const form = ref<Omit<ICategory, 'id'>>({
 
 async function onSubmit() {
   try {
-    await store.createCategory({ name: form.value.name });
-    await router.push('/categories'); // или другой путь назад
+    await createCategoryApi({ name: form.value.name })
+    await router.push('/categories');
   } catch (error) {
-    console.error('Ошибка при сохранении:', error);
+    console.error('Ошибка при сохранении категории:', error)
   }
 }
 
