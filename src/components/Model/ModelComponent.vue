@@ -202,7 +202,7 @@ onMounted(async () => {
       tempImage: null,
       tempModel: null,
       price: modelFromStore.price,
-      is_active: modelFromStore.is_active || true,
+      is_active: modelFromStore.is_active !== undefined ? modelFromStore.is_active : true,
       is_stock: modelFromStore.is_stock || false,
       position: modelFromStore.position || 0,
       button_name: modelFromStore.button_name || 'Ваша кнопка',

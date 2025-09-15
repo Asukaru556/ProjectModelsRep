@@ -57,9 +57,9 @@ async function onDelete() {
 }
 
 function onReset() {
-  if (!form.value) return;
-  const category = categories.value.find((x) => x.id === form.value?.id);
-  if (category) { form.value.name = category.name; }
+  if (form.value) {
+    form.value.name = '';
+  }
 }
 </script>
 

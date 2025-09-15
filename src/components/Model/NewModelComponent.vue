@@ -84,8 +84,7 @@
           label="Цена"
           hint="Стоимость модели"
           :rules="[
-            val => val !== null && val !== undefined || 'Поле обязательно!',
-            val => val >= 0 || 'Цена не может быть отрицательной',
+            val => val === null || val === undefined || val >= 0 || 'Цена не может быть отрицательной'
           ]"
         />
 
@@ -95,17 +94,19 @@
           label="Ссылка на магазин"
           hint="Прямая ссылка на покупку"
           :rules="[
-            val => !!val || 'Ссылка обязательна',
-            val => /^https?:\/\/.+/.test(val) || 'Ссылка должна начинаться с http:// или https://',
+            val => !val || /^https?:\/\/.+/.test(val) || 'Ссылка должна начинаться с http:// или https://'
           ]"
         />
+
 
         <q-input
           filled
           v-model="form.button_name"
           label="Название кнопки"
           hint="Текст на кнопке покупки"
-          :rules="[val => (val && val.length < 50) || 'Не более 50 символов']"
+          :rules="[
+    val => !val || val.length < 50 || 'Не более 50 символов'
+  ]"
         />
 
         <q-checkbox

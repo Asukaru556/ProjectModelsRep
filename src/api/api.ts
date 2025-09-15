@@ -12,10 +12,10 @@ class ApiClient {
     this.defaultHeaders = {
       'Content-Type': 'application/json',
     }
-    const token = Cookies.get('login_token');
-    if (token) {
-      this.defaultHeaders['Authorization'] = `Bearer ${token}`;
-    }
+    // const token = Cookies.get('login_token');
+    // if (token) {
+    //   this.defaultHeaders['Authorization'] = `Bearer ${token}`;
+    // }
   }
 
 
